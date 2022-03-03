@@ -1,5 +1,10 @@
 var EmployeeRouter = require("express").Router();
 const Employee = require("../models/Employee");
+const Resume = require("../models/Resume");
+const multer = require("multer");
+const fs = require("fs");
+
+var upload = multer({ dest: "../public/uploads/" });
 
 EmployeeRouter.post("/add", async (req, res) => {
   let user = req.body;
@@ -36,7 +41,6 @@ EmployeeRouter.post("/add", async (req, res) => {
 });
 
 EmployeeRouter.get("/:id/employee", async (req, res) => {
-  console.log("afdsfsd");
   let id = req.params.id;
   let condition = { enterpriseId: id };
   Employee.getEmployeeByEnterpriseId(condition)
@@ -56,6 +60,46 @@ EmployeeRouter.get("/name", async (req, res) => {
       res.status(200).json({
         data: employeeData,
       });
+    })
+    .catch(function (err) {
+      res.status(500).json(err);
+    });
+});
+
+EmployeeRouter.post("/resume", upload.array("resume"), async (req, res) => {
+  console.log("API resume begins");
+  try {
+    let resumeDetails = {
+      resumePath: fs.readFileSync(req.files[0].path),
+      eid: req.body.eid,
+    };
+    Resume.saveResume(req.files[0], resumeDetails)
+      .then(function (resume) {
+        res.status(200).json({
+          data: resume,
+        });
+      })
+      .catch(function (err) {
+        console.log(err);
+        res.status(500).json(err);
+      });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  } finally {
+    console.log("API resume ends");
+  }
+});
+
+EmployeeRouter.get("/resume/:id", async (req, res) => {
+  const condition = {
+    enterpriseId: req.params.id,
+  };
+  Resume.getResume(condition)
+    .then(function (resume) {
+      console.log("Sending Resume!");
+      res.status(200).json(resume);
+      console.log("Done");
     })
     .catch(function (err) {
       res.status(500).json(err);

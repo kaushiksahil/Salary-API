@@ -1,5 +1,6 @@
 const express = require("express");
 let API = require("./api-route");
+const cors = require("cors");
 let employeeAPI = require("./controller/Employee");
 let masterAPI = require("./controller/Masters");
 let payrollAPI = require("./controller/Payroll");
@@ -18,6 +19,7 @@ var db = mongoose.connection;
 if (!db) console.log("Error connecting db");
 else console.log("Db connected successfully");
 app.use(bodyParser.json());
+app.use(cors());
 var port = process.env.PORT || 4000;
 // app.get("/", (req, res) => res.send("Its Working!!"));
 // app.use("/init", API);
